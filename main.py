@@ -10,7 +10,6 @@ import asyncio
 import requests
 import subprocess
 import cloudscraper
-import logging
 
 import core as helper
 from utils import progress_bar
@@ -26,144 +25,12 @@ from pyrogram.errors.exceptions.bad_request_400 import StickerEmojiInvalid
 from pyrogram.types.messages_and_media import message
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-# Configure logging
-from logs import logging
 
-# Import Flask app from app.py to make it available for Gunicorn
-from app import app
-
-# Initialize Telegram bot
 bot = Client(
     "bot",
     api_id=API_ID,
     api_hash=API_HASH,
     bot_token=BOT_TOKEN)
-
-# Track ongoing processes
-ongoing_processes = {}
-token = "noo"  # Default token for non-password protected sites
-
-# Start command handler
-@bot.on_message(filters.command(["start"]))
-async def start(bot: Client, m: Message):
-    """Handler for the /start command"""
-    keyboard = InlineKeyboardMarkup(
-        [
-            [
-                InlineKeyboardButton("Help 📚", callback_data="help"),
-                InlineKeyboardButton("About 👨‍💻", callback_data="about")
-            ],
-            [
-                InlineKeyboardButton("Text to Video 📹", callback_data="txt_to_video")
-            ]
-        ]
-    )
-    await m.reply_text(
-        f"<b>Hello {m.from_user.mention} 👋\n\n"
-        f"I am a Text to Video Uploader Bot. I can download videos from URLs in a text file and upload them to Telegram.</b>",
-        reply_markup=keyboard
-    )
-
-# Help command handler
-@bot.on_message(filters.command(["help"]))
-async def help_command(bot: Client, m: Message):
-    """Handler for the /help command"""
-    help_text = (
-        "<b>📚 Available Commands:</b>\n\n"
-        "/start - Start the bot\n"
-        "/help - Show this help message\n"
-        "/chahal - Start text file processing\n"
-        "/stop - Stop ongoing processes\n\n"
-        "<b>How to use:</b>\n"
-        "1. Send /chahal command\n"
-        "2. Upload a text file with video URLs (one per line)\n"
-        "3. Follow the prompts to select resolution, add caption, etc.\n"
-        "4. The bot will download and upload the videos"
-    )
-    await m.reply_text(help_text)
-
-# Callback query handler
-@bot.on_callback_query()
-async def callback_handler(bot, callback_query):
-    """Handler for callback queries from inline buttons"""
-    data = callback_query.data
-    
-    if data == "help":
-        help_text = (
-            "<b>📚 Available Commands:</b>\n\n"
-            "/start - Start the bot\n"
-            "/help - Show this help message\n"
-            "/chahal - Start text file processing\n"
-            "/stop - Stop ongoing processes\n\n"
-            "<b>How to use:</b>\n"
-            "1. Send /chahal command\n"
-            "2. Upload a text file with video URLs (one per line)\n"
-            "3. Follow the prompts to select resolution, add caption, etc.\n"
-            "4. The bot will download and upload the videos"
-        )
-        await callback_query.message.edit_text(help_text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Back", callback_data="back")]]))
-    
-    elif data == "about":
-        about_text = (
-            "<b>👨‍💻 About This Bot:</b>\n\n"
-            "This bot is designed to download videos from URLs provided in a text file and upload them to Telegram.\n\n"
-            "<b>Features:</b>\n"
-            "• Multiple video source support\n"
-            "• Resolution selection\n"
-            "• Custom captions\n"
-            "• Progress tracking\n"
-            "• Batch processing\n\n"
-            "<b>Supported Platforms:</b>\n"
-            "• YouTube\n"
-            "• ClassPlus\n"
-            "• VisionIAS\n"
-            "• UtkarshApp\n"
-            "• ClassX APIs (ssbguideapi, learnwithsumitapi)\n"
-            "• Google Drive\n"
-            "• Many more...\n\n"
-            "<b>Developer:</b> 💖@chahal_badfella💖"
-        )
-        await callback_query.message.edit_text(about_text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Back", callback_data="back")]]))
-    
-    elif data == "txt_to_video":
-        await callback_query.message.reply_text("Please use the /chahal command to start processing a text file.")
-    
-    elif data == "back":
-        keyboard = InlineKeyboardMarkup(
-            [
-                [
-                    InlineKeyboardButton("Help 📚", callback_data="help"),
-                    InlineKeyboardButton("About 👨‍💻", callback_data="about")
-                ],
-                [
-                    InlineKeyboardButton("Text to Video 📹", callback_data="txt_to_video")
-                ]
-            ]
-        )
-        await callback_query.message.edit_text(
-            f"<b>Hello {callback_query.from_user.mention} 👋\n\n"
-            f"I am a Text to Video Uploader Bot. I can download videos from URLs in a text file and upload them to Telegram.</b>",
-            reply_markup=keyboard
-        )
-    
-    await callback_query.answer()
-
-# Stop command handler
-@bot.on_message(filters.command("stop"))
-async def stop_handler(_, m):
-    """Handler to stop ongoing processes"""
-    chat_id = m.chat.id
-    
-    if chat_id in ongoing_processes:
-        try:
-            # Cancel the ongoing task
-            ongoing_processes[chat_id].cancel()
-            del ongoing_processes[chat_id]
-            await m.reply_text("**𝗦𝘁𝗼𝗽𝗽𝗲𝗱**🚦", True)
-        except Exception as e:
-            await m.reply_text(f"Error stopping process: {str(e)}")
-    else:
-        await m.reply_text("No ongoing processes to stop.", True)
 
 
 @bot.on_message(filters.command(["start"]))
