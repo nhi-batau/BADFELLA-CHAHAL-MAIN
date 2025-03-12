@@ -93,6 +93,6 @@ async def progress_bar(current, total, reply, start):
             progress_bar = "▰" * completed_length + "▱" * remaining_length
             
             try:
-                await reply.edit(f'<b>\n ╭──⌯════𝐔𝐏𝐋𝐎𝐀𝐃𝐈𝐍𝐆⬇️⬇️═════⌯──╮ \n├⚡ {progress_bar}|﹝{perc}﹞ \n├🚀 Speed » {sp} \n├📟 Processed » {cur}\n├🧲 Size - ETA » {tot} - {eta} \n├🤖 Bot Made By » @team_achiever⚡\n╰─═══ ✪❤️‍🔥@chahal_badfella❤️‍🔥✪ ═══─╯\n</b>') 
+                await reply.edit(f'<b>\n ╭──⌯════𝐔𝐏𝐋𝐎𝐀𝐃𝐈𝐍𝐆⬇️⬇️═════⌯──╮ \n├⚡ {progress_bar}|﹝{perc}﹞ \n├🚀 Speed » {sp} \n├📟 Processed » {cur}\n├🧲 Size - ETA » {tot} - {eta} \n├🤖 Bot Made By » 𝔹ℍ𝕌𝕄𝕀ℍ𝔸ℝ⚡\n╰─═══ ✪@Thebhumihar✪ ═══─╯\n</b>') 
             except FloodWait as e:
                 time.sleep(e.x)
